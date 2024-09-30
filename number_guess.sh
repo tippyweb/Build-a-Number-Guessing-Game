@@ -29,7 +29,8 @@ MAIN() {
     RECORDS=$($PSQL "SELECT games_played, best_game FROM records WHERE user_id=$USER_ID;")
 
   # display welcome message to the user
-    echo "$RECORDS" | while read GAMES_PLAYED BAR BEST_GAME
+    IFS="|"
+    echo "$RECORDS" | while read GAMES_PLAYED BEST_GAME
     do
       echo "Welcome back, $USERNAME! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
     done
@@ -43,13 +44,18 @@ MAIN() {
   
   echo "The secret number is: $SECRET"
 
+
+
 # prompt the user for a guess
   echo "Guess the secret number between 1 and 1000:"
   read GUESS
   ROUND=1
 
+echo "Current round is: $ROUND"
+
+
 # while the guess isn't correct
-  while [ '$SECRET' -ne '$GUESS' ]
+  while [ $SECRET -ne $GUESS ]
   do
   
     # guess was an integer
@@ -71,7 +77,9 @@ MAIN() {
     fi
 
     read GUESS
-    ROUND=$ROUND+1
+    ROUND=$(( $ROUND + 1 ))
+
+echo "Current round is: $ROUND"
 
   done
 
@@ -80,13 +88,13 @@ MAIN() {
 
   # update the user's record
   IFS="|"
-
   RECORDS=$($PSQL "SELECT games_played, best_game FROM records WHERE user_id=$USER_ID;")
   echo "$RECORDS" | while read GAMES_PLAYED BEST_GAME
   do
-    UPDATE_RECORD_RESULT=$($PSQL "UPDATE records SET games_played=$GAMES_PLAYED+1 WHERE user_id=$USER_ID;")
+    GAMES_PLAYED=$(( $GAMES_PLAYED + 1 ))
+    UPDATE_RECORD_RESULT=$($PSQL "UPDATE records SET games_played=$GAMES_PLAYED WHERE user_id=$USER_ID;")
  
-    if [[ $ROUND -lt $BEST_GAME]]
+    if [[ $ROUND -lt $BEST_GAME ]]
     then
       UPDATE_RECORD_RESULT=$($PSQL "UPDATE records SET best_game=$ROUND WHERE user_id=$USER_ID;")
     fi
