@@ -34,6 +34,7 @@ MAIN() {
     do
       echo "Welcome back, $USERNAME! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
     done
+    IFS=""
 
   fi
 
@@ -49,6 +50,14 @@ MAIN() {
 # prompt the user for a guess
   echo "Guess the secret number between 1 and 1000:"
   read GUESS
+
+# check if the guess is an integer
+  while [ ! $GUESS =~ ^[0-9]+$ ]
+  do
+    echo "That is not an integer, guess again:"
+    read GUESS
+  done
+
   ROUND=1
 
 echo "Current round is: $ROUND"
@@ -58,25 +67,22 @@ echo "Current round is: $ROUND"
   while [ $SECRET -ne $GUESS ]
   do
   
-    # guess was an integer
-#    if [[ $GUESS =~ ^[1-1000]$ ]]
-    if [[ $GUESS =~ ^[0-9]+$ ]]
+    if [[ $SECRET -gt $GUESS ]]
     then
-
-      if [[ $SECRET -gt $GUESS ]]
-      then
-        echo "It's higher than that, guess again:"
-      else
-        echo "It's lower than that, guess again:"
-      fi
-    
-    # guess wasn't an integer
+      echo "It's higher than that, guess again:"
     else
-      echo "That is not an integer, guess again:"
-
+      echo "It's lower than that, guess again:"
     fi
 
     read GUESS
+
+    # check if the guess is an integer
+    while [ ! $GUESS =~ ^[0-9]+$ ]
+    do
+      echo "That is not an integer, guess again:"
+      read GUESS
+    done
+
     ROUND=$(( $ROUND + 1 ))
 
 echo "Current round is: $ROUND"
