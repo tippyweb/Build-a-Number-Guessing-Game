@@ -27,9 +27,18 @@ MAIN() {
 # if username already exists
   else
 
-    echo "User exists"
+  # get the user's records
+    RECORDS=$($PSQL "SELECT games_played, best_game FROM records WHERE user_id=$USER_ID;")
+
+  # display welcome message to the user
+    echo "$RECORDS" | while read GAMES_PLAYED BAR BEST_GAME
+    do
+      echo "Welcome back, $USERNAME! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
+    done
 
   fi
+
+
 
 }
 
