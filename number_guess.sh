@@ -30,7 +30,7 @@ MAIN() {
 # if username already exists
   else
 
-  # get the user's records
+  # retrieve the user's records
     RECORDS=$($PSQL "SELECT games_played, best_game FROM records WHERE user_id=$USER_ID;")
 
   # display welcome message to the user
@@ -56,16 +56,13 @@ echo "The secret number is: $SECRET"
   read GUESS
 
 # check if the guess is an integer
-  while [ ! $(( $GUESS )) =~ ^[0-9]+$ ]
+  while [[ ! $GUESS =~ ^[0-9]+$ ]]
   do
     echo "That is not an integer, guess again:"
     read GUESS
   done
 
   ROUND=1
-
-echo "Current round is: $ROUND"
-
 
 # while the guess isn't correct
   while [ $SECRET -ne $GUESS ]
@@ -81,7 +78,7 @@ echo "Current round is: $ROUND"
     read GUESS
 
     # check if the guess is an integer
-    while [ ! $(( $GUESS )) =~ ^[0-9]+$ ]
+    while [[ ! $GUESS =~ ^[0-9]+$ ]]
     do
       echo "That is not an integer, guess again:"
       read GUESS
@@ -89,18 +86,17 @@ echo "Current round is: $ROUND"
 
     ROUND=$(( $ROUND + 1 ))
 
-echo "Current round is: $ROUND"
-
   done
 
   # user made the correct guess
   echo "You guessed it in $ROUND tries. The secret number was $SECRET. Nice job!"
 
   # retrieve the user's record
-  RECORDS=$($PSQL "SELECT games_played, best_game FROM records WHERE user_id=$USER_ID;")
+#  RECORDS=$($PSQL "SELECT games_played, best_game FROM records WHERE user_id=$USER_ID;")
   IFS="|"
   echo "$RECORDS" | while read GAMES_PLAYED BEST_GAME
   do
+
 
 echo "Records: $RECORDS"
 echo "GAMES_PLAYED: $GAMES_PLAYED, BEST_GAME: $BEST_GAME"
@@ -116,7 +112,7 @@ echo "Prior to UPDATE record, User_id: $USER_ID"
 
     UPDATE_RECORD_RESULT=$($PSQL "UPDATE records SET games_played=$GAMES_PLAYED WHERE user_id=$USER_ID;")
  
-    if [[ $(( $ROUND )) -lt $(( $BEST_GAME )) ]]
+    if [[ $ROUND -lt $BEST_GAME ]]
     then
       UPDATE_RECORD_RESULT=$($PSQL "UPDATE records SET best_game=$ROUND WHERE user_id=$USER_ID;")
     fi
