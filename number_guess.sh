@@ -28,11 +28,9 @@ MAIN() {
   else
 
   # retrieve the user's records
-    RECORDS=$($PSQL "SELECT guesses FROM records WHERE user_id=$USER_ID;")
-
-    GAMES_PLAYED=$( echo $RECORDS | wc -l )
-    BEST_GAME=$( echo $RECORDS | sort -n | awk '{echo $1}' )
-
+    GAMES_PLAYED=$($PSQL "SELECT COUNT (*) FROM records WHERE user_id=$USER_ID;")
+    BEST_GAME=$($PSQL "SELECT MIN(guesses) FROM records WHERE user_id=$USER_ID;")
+  
   # display welcome message to the user
     echo "Welcome back, $USERNAME! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
 
@@ -42,10 +40,6 @@ MAIN() {
   min=1
   max=1000 
   SECRET=$(( $RANDOM%($max-$min+1)+$min ))
-  
-#echo "The secret number is: $SECRET"
-
-
 
 # prompt the user for a guess
   echo "Guess the secret number between 1 and 1000:"
