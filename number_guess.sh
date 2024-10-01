@@ -1,4 +1,9 @@
 #!/bin/bash
+
+##############################################################################
+# Number Guessing Game - 2024-10-01
+##############################################################################
+
 # global variables
 # PSQL="psql -X --username=freecodecamp --dbname=number_guess --tuples-only -c"
 PSQL="psql --username=freecodecamp --dbname=number_guess -t --no-align -c"
