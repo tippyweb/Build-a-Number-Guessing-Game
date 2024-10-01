@@ -3,6 +3,41 @@
 # PSQL="psql -X --username=freecodecamp --dbname=number_guess --tuples-only -c"
 PSQL="psql --username=freecodecamp --dbname=number_guess -t --no-align -c"
 
+UPDATE_RECORDS() {
+
+  USER_ID=$1
+  ROUND=$2
+
+# retrieve the user's record
+  RECORDS=$($PSQL "SELECT games_played, best_game FROM records WHERE user_id=$USER_ID;")
+  IFS="|"
+  echo "$RECORDS" | while read GAMES_PLAYED BEST_GAME
+  do
+
+
+echo "Records: $RECORDS"
+echo "GAMES_PLAYED: $GAMES_PLAYED, BEST_GAME: $BEST_GAME"
+
+
+    # update the user's record
+    GAMES_PLAYED=$(( $GAMES_PLAYED + 1 ))
+
+
+echo "Incremented GAMES_PLAYED: $GAMES_PLAYED"
+echo "Prior to UPDATE record, User_id: $USER_ID"
+
+
+    UPDATE_RECORD_RESULT=$($PSQL "UPDATE records SET games_played=$GAMES_PLAYED WHERE user_id=$USER_ID;")
+ 
+    if [[ $ROUND -lt $BEST_GAME ]]
+    then
+      UPDATE_RECORD_RESULT=$($PSQL "UPDATE records SET best_game=$ROUND WHERE user_id=$USER_ID;")
+    fi
+
+  done
+}
+
+
 MAIN() {
 
 # get the username
@@ -91,33 +126,8 @@ echo "The secret number is: $SECRET"
   # user made the correct guess
   echo "You guessed it in $ROUND tries. The secret number was $SECRET. Nice job!"
 
-  # retrieve the user's record
-#  RECORDS=$($PSQL "SELECT games_played, best_game FROM records WHERE user_id=$USER_ID;")
-  IFS="|"
-  echo "$RECORDS" | while read GAMES_PLAYED BEST_GAME
-  do
-
-
-echo "Records: $RECORDS"
-echo "GAMES_PLAYED: $GAMES_PLAYED, BEST_GAME: $BEST_GAME"
-
-
-    # update the user's record
-    GAMES_PLAYED=$(( $GAMES_PLAYED + 1 ))
-
-
-echo "Incremented GAMES_PLAYED: $GAMES_PLAYED"
-echo "Prior to UPDATE record, User_id: $USER_ID"
-
-
-    UPDATE_RECORD_RESULT=$($PSQL "UPDATE records SET games_played=$GAMES_PLAYED WHERE user_id=$USER_ID;")
- 
-    if [[ $ROUND -lt $BEST_GAME ]]
-    then
-      UPDATE_RECORD_RESULT=$($PSQL "UPDATE records SET best_game=$ROUND WHERE user_id=$USER_ID;")
-    fi
-
-  done
+  # update the user's records
+  UPDATE_RECORDS $USER_ID $ROUND
   
 }
 
