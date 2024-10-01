@@ -3,41 +3,6 @@
 # PSQL="psql -X --username=freecodecamp --dbname=number_guess --tuples-only -c"
 PSQL="psql --username=freecodecamp --dbname=number_guess -t --no-align -c"
 
-UPDATE_RECORDS() {
-
-  USER_ID=$1
-  ROUND=$2
-
-# retrieve the user's record
-  RECORDS=$($PSQL "SELECT games_played, best_game FROM records WHERE user_id=$USER_ID;")
-  IFS="|"
-  echo "$RECORDS" | while read GAMES_PLAYED BEST_GAME
-  do
-
-
-echo "Records: $RECORDS"
-echo "GAMES_PLAYED: $GAMES_PLAYED, BEST_GAME: $BEST_GAME"
-
-
-    # update the user's record
-    GAMES_PLAYED=$(( $GAMES_PLAYED + 1 ))
-
-
-echo "Incremented GAMES_PLAYED: $GAMES_PLAYED"
-echo "Prior to UPDATE record, User_id: $USER_ID"
-
-
-    UPDATE_RECORD_RESULT=$($PSQL "UPDATE records SET games_played=$GAMES_PLAYED WHERE user_id=$USER_ID;")
- 
-    if [[ $ROUND -lt $BEST_GAME ]]
-    then
-      UPDATE_RECORD_RESULT=$($PSQL "UPDATE records SET best_game=$ROUND WHERE user_id=$USER_ID;")
-    fi
-
-  done
-}
-
-
 MAIN() {
 
 # get the username
@@ -59,21 +24,17 @@ MAIN() {
     # get the user_id of this user
     USER_ID=$($PSQL "SELECT user_id FROM users WHERE username='$USERNAME';")
 
-    # initialize the user's records
-    INSERT_RECORD_RESULT=$($PSQL "INSERT INTO records(user_id, games_played, best_game) VALUES($USER_ID, 0, 1000000);")
-
 # if username already exists
   else
 
   # retrieve the user's records
-    RECORDS=$($PSQL "SELECT games_played, best_game FROM records WHERE user_id=$USER_ID;")
+    RECORDS=$($PSQL "SELECT guesses FROM records WHERE user_id=$USER_ID;")
+
+    GAMES_PLAYED=$( echo $RECORDS | wc -l )
+    BEST_GAME=$( echo $RECORDS | sort -n | awk '{echo $1}' )
 
   # display welcome message to the user
-    IFS="|"
-    echo "$RECORDS" | while read GAMES_PLAYED BEST_GAME
-    do
-      echo "Welcome back, $USERNAME! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
-    done
+    echo "Welcome back, $USERNAME! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
 
   fi
 
@@ -82,7 +43,7 @@ MAIN() {
   max=1000 
   SECRET=$(( $RANDOM%($max-$min+1)+$min ))
   
-echo "The secret number is: $SECRET"
+#echo "The secret number is: $SECRET"
 
 
 
@@ -124,10 +85,11 @@ echo "The secret number is: $SECRET"
   done
 
   # user made the correct guess
-  echo "You guessed it in $ROUND tries. The secret number was $SECRET. Nice job!"
+  # insert the user's record
+  INSERT_RECORD_RESULT=$($PSQL "INSERT INTO records(user_id, guesses) VALUES($USER_ID, $ROUND);")
 
-  # update the user's records
-  UPDATE_RECORDS $USER_ID $ROUND
+  # display the message to the user
+  echo "You guessed it in $ROUND tries. The secret number was $SECRET. Nice job!"
   
 }
 
